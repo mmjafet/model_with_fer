@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emotion Prediction</title>
+    <title>Predicción de Emoción</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -53,6 +53,12 @@
             color: #333;
         }
 
+        #imagePreview {
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+        }
+
         /* Estilo para el círculo de carga */
         #loader {
             display: none;
@@ -75,19 +81,20 @@
 </head>
 <body>
     <div class="container">
-        <h1>Upload Image for Emotion Prediction</h1>
+        <h1>Sube una imagen para predecir la emoción</h1>
         <form id="jsonForm" enctype="multipart/form-data" method="POST" action="/predict">
             <input type="file" name="file" id="file" accept="image/*" required>
-            <button type="submit">Submit</button>
+            <button type="submit">Enviar</button>
         </form>
 
         <!-- Círculo de carga -->
         <div id="loader"></div>
 
-        <h2>Prediction Result:</h2>
-        <div id="result">
-            <!-- Aquí se mostrará el JSON de respuesta -->
-        </div>
+        <h2>Resultado de la predicción:</h2>
+        <div id="result"></div>
+
+        <h2>Imagen seleccionada:</h2>
+        <img id="imagePreview" src="" alt="Imagen seleccionada">
     </div>
 
     <script>
@@ -113,10 +120,17 @@
             // Ocultar el círculo de carga
             document.getElementById('loader').style.display = 'none';
 
-            // Mostrar los resultados
+            // Mostrar la emoción y la imagen
             document.getElementById('result').innerHTML = `
-                <pre>${JSON.stringify(data, null, 2)}</pre>
+                <strong>Emoción predicha:</strong> ${data.emotion}
             `;
+
+            // Mostrar la imagen cargada
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('imagePreview').src = e.target.result;
+            };
+            reader.readAsDataURL(document.getElementById('file').files[0]);
         };
     </script>
 </body>
