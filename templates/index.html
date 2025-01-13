@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 600px;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        h1 {
+            color: #5C6BC0;
+        }
+
+        input[type="file"] {
+            margin: 20px 0;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #5C6BC0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #3949AB;
+        }
+
+        #result {
+            margin-top: 30px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        /* Estilo para el círculo de carga */
+        #loader {
+            display: none;
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+
+        /* Animación del círculo de carga */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Image for Emotion Prediction</h1>
+        <form id="jsonForm" enctype="multipart/form-data" method="POST" action="/predict">
+            <input type="file" name="file" id="file" accept="image/*" required>
+            <button type="submit">Submit</button>
+        </form>
+
+        <!-- Círculo de carga -->
+        <div id="loader"></div>
+
+        <h2>Prediction Result:</h2>
+        <div id="result">
+            <!-- Aquí se mostrará el JSON de respuesta -->
+        </div>
+    </div>
+
+    <script>
+        // Manejo del formulario y mostrar el resultado en la página sin recargarla
+        document.getElementById('jsonForm').onsubmit = async function(event) {
+            event.preventDefault();
+
+            // Mostrar el círculo de carga
+            document.getElementById('loader').style.display = 'block';
+
+            const formData = new FormData();
+            formData.append('file', document.getElementById('file').files[0]);
+
+            // Hacer la solicitud
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            // Obtener los datos de la respuesta
+            const data = await response.json();
+
+            // Ocultar el círculo de carga
+            document.getElementById('loader').style.display = 'none';
+
+            // Mostrar los resultados
+            document.getElementById('result').innerHTML = `
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+        };
+    </script>
+</body>
+</html>
