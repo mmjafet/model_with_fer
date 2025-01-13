@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, redirect
 import numpy as np
 from PIL import Image
 import io
@@ -50,6 +50,28 @@ def index():
         return jsonify({"emotion": emotion_text})
 
     return render_template('index.html')
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    file = request.files.get('file')
+    if not file or file.filename == '':
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+    file.save(file_path)
+
+    img_facialexpression = preprocess_image(file_path, target_size=(48, 48))
+    try:
+        img_facialexpr_list = img_facialexpression.tolist()
+        data = json.dumps({"signature_name": "serving_default", "instances": img_facialexpr_list})
+        json_response2 = requests.post('https://tfexpressions-v1.onrender.com/v1/models/saved_model/versions/2:predict', data=data, headers=headers)
+        json_response2.raise_for_status()
+        facial_express = np.argmax(json.loads(json_response2.text)['predictions'], axis=1)
+        emotion_text = label_to_text[int(facial_express)]
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"No se pudo conectar con el servidor de TensorFlow Serving. Detalles: {e}"})
+
+    return jsonify({"emotion": emotion_text})
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=os.getenv('PORT', default=5000))
