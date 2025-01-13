@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify, render_template
 from deepface import DeepFace
 import io
 from PIL import Image
-import numpy as np
+import numpy as np, os
+
 
 app = Flask(__name__)
 
