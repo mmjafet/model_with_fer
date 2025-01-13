@@ -1,137 +1,137 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predicción de Emoción</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-        }
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Predicción de Emoción</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f9;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                    text-align: center;
+                }
 
-        .container {
-            width: 80%;
-            max-width: 600px;
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
+                .container {
+                    width: 80%;
+                    max-width: 600px;
+                    background-color: white;
+                    padding: 20px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    border-radius: 10px;
+                }
 
-        h1 {
-            color: #5C6BC0;
-        }
+                h1 {
+                    color: #5C6BC0;
+                }
 
-        input[type="file"] {
-            margin: 20px 0;
-            font-size: 16px;
-        }
+                input[type="file"] {
+                    margin: 20px 0;
+                    font-size: 16px;
+                }
 
-        button {
-            padding: 10px 20px;
-            background-color: #5C6BC0;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+                button {
+                    padding: 10px 20px;
+                    background-color: #5C6BC0;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }
 
-        button:hover {
-            background-color: #3949AB;
-        }
+                button:hover {
+                    background-color: #3949AB;
+                }
 
-        #result {
-            margin-top: 30px;
-            font-size: 18px;
-            color: #333;
-        }
+                #result {
+                    margin-top: 30px;
+                    font-size: 18px;
+                    color: #333;
+                }
 
-        #imagePreview {
-            margin-top: 20px;
-            max-width: 100%;
-            height: auto;
-        }
+                #imagePreview {
+                    margin-top: 20px;
+                    max-width: 100%;
+                    height: auto;
+                }
 
-        /* Estilo para el círculo de carga */
-        #loader {
-            display: none;
-            border: 8px solid #f3f3f3; /* Light grey */
-            border-top: 8px solid #3498db; /* Blue */
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 2s linear infinite;
-            margin: 20px auto;
-        }
+                /* Estilo para el círculo de carga */
+                #loader {
+                    display: none;
+                    border: 8px solid #f3f3f3; /* Light grey */
+                    border-top: 8px solid #3498db; /* Blue */
+                    border-radius: 50%;
+                    width: 50px;
+                    height: 50px;
+                    animation: spin 2s linear infinite;
+                    margin: 20px auto;
+                }
 
-        /* Animación del círculo de carga */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+                /* Animación del círculo de carga */
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
 
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Sube una imagen para predecir la emoción</h1>
-        <form id="jsonForm" enctype="multipart/form-data" method="POST" action="/predict">
-            <input type="file" name="file" id="file" accept="image/*" required>
-            <button type="submit">Enviar</button>
-        </form>
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Sube una imagen para predecir la emoción</h1>
+                <form id="jsonForm" enctype="multipart/form-data" method="POST" action="/predict">
+                    <input type="file" name="file" id="file" accept="image/*" required>
+                    <button type="submit">Enviar</button>
+                </form>
 
-        <!-- Círculo de carga -->
-        <div id="loader"></div>
+                <!-- Círculo de carga -->
+                <div id="loader"></div>
 
-        <h2>Resultado de la predicción:</h2>
-        <div id="result"></div>
+                <h2>Resultado de la predicción:</h2>
+                <div id="result"></div>
 
-        <h2>Imagen seleccionada:</h2>
-        <img id="imagePreview" src="" alt="Imagen seleccionada">
-    </div>
+                <h2>Imagen seleccionada:</h2>
+                <img id="imagePreview" src="" alt="Imagen seleccionada">
+            </div>
 
-    <script>
-        // Manejo del formulario y mostrar el resultado en la página sin recargarla
-        document.getElementById('jsonForm').onsubmit = async function(event) {
-            event.preventDefault();
+            <script>
+                // Manejo del formulario y mostrar el resultado en la página sin recargarla
+                document.getElementById('jsonForm').onsubmit = async function(event) {
+                    event.preventDefault();
 
-            // Mostrar el círculo de carga
-            document.getElementById('loader').style.display = 'block';
+                    // Mostrar el círculo de carga
+                    document.getElementById('loader').style.display = 'block';
 
-            const formData = new FormData();
-            formData.append('file', document.getElementById('file').files[0]);
+                    const formData = new FormData();
+                    formData.append('file', document.getElementById('file').files[0]);
 
-            // Hacer la solicitud
-            const response = await fetch('/predict', {
-                method: 'POST',
-                body: formData
-            });
+                    // Hacer la solicitud
+                    const response = await fetch('/predict', {
+                        method: 'POST',
+                        body: formData
+                    });
 
-            // Obtener los datos de la respuesta
-            const data = await response.json();
+                    // Obtener los datos de la respuesta
+                    const data = await response.json();
 
-            // Ocultar el círculo de carga
-            document.getElementById('loader').style.display = 'none';
+                    // Ocultar el círculo de carga
+                    document.getElementById('loader').style.display = 'none';
 
-            // Mostrar la emoción y la imagen
-            document.getElementById('result').innerHTML = `
-                <strong>Emoción predicha:</strong> ${data.emotion}
-            `;
+                    // Mostrar la emoción y la imagen
+                    document.getElementById('result').innerHTML = `
+                        <strong>Emoción predicha:</strong> ${data.emotion}
+                    `;
 
-            // Mostrar la imagen cargada
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('imagePreview').src = e.target.result;
-            };
-            reader.readAsDataURL(document.getElementById('file').files[0]);
-        };
-    </script>
-</body>
-</html>
+                    // Mostrar la imagen cargada
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('imagePreview').src = e.target.result;
+                    };
+                    reader.readAsDataURL(document.getElementById('file').files[0]);
+                };
+            </script>
+        </body>
+        </html>
